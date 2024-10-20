@@ -9,6 +9,7 @@ import {
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
 import { Task, TaskStatus } from './tasks.entity';
+import { CreateTaskDto } from './create-task.dto';
 
 @Controller('tasks')
 export class TasksController {
@@ -25,11 +26,8 @@ export class TasksController {
   }
 
   @Post()
-  async createTask(
-    @Body('title') title: string,
-    @Body('description') description: string,
-  ): Promise<Task> {
-    return await this.tasksService.createTask(title, description);
+  async createTask(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
+    return await this.tasksService.createTask(createTaskDto);
   }
 
   @Delete(':id')
@@ -37,7 +35,7 @@ export class TasksController {
     return await this.tasksService.deleteTask(id);
   }
 
-  @Put(':id/status')
+  @Put(':id')
   async updateTaskStatus(
     @Param('id') id: number,
     @Body('status') status: TaskStatus,
