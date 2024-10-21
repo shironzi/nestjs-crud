@@ -21,8 +21,8 @@ describe('TasksController', () => {
       controllers: [TasksController],
       providers: [
         {
-          provide: TasksService,  // Provide the TasksService mock
-          useValue: mockTasksService,  // Use the mock implementation
+          provide: TasksService, // Provide the TasksService mock
+          useValue: mockTasksService, // Use the mock implementation
         },
       ],
     }).compile();
