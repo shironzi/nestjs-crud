@@ -1,21 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
-
-export enum userRole {
-  ADMIN = 'ADMIN',
-  CUSTOMER = 'CUSTOMER',
-}
-
-@Entity()
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 export class CreateUser {
-  @PrimaryGeneratedColumn()
+  @IsNotEmpty()
+  @IsString()
   username: string;
 
-  @Column()
+  @IsNotEmpty()
+  @IsEmail()
   email: string;
 
-  @Column()
+  @IsNotEmpty()
+  @IsString()
   password: string;
-
-  @Column()
-  role: userRole;
 }

@@ -1,10 +1,10 @@
-import { Column, Entity } from 'typeorm';
-
-@Entity()
+import { IsNotEmpty, IsString } from 'class-validator';
 export class Login {
-  @Column()
+  @IsNotEmpty()
+  @IsString()
   username: string;
 
-  @Column()
+  @IsNotEmpty()
+  @IsString()
   password: string;
 }

@@ -1,9 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './dto/user.entity';
 import { Repository } from 'typeorm';
 import { CreateUser } from './dto/create-user.dto';
 import { Login } from './dto/login.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -17,16 +23,40 @@ export class UsersService {
   }
 
   async getUserByUsername(username: string): Promise<User> {
-    return await this.userRepository.findOneBy({ username });
+    const user = await this.userRepository.findOne({ where: { username } });
+
+    if (!user) {
+      throw new NotFoundException(`User with ${username} not found`);
+    }
+
+    return user;
   }
 
-  async CreateUser(createUserDto: CreateUser): Promise<User> {
+  async createUser(createUserDto: CreateUser): Promise<User> {
     const { username, email, password } = createUserDto;
+
+    const usernameTaken = await this.userRepository.findOne({
+      where: { username },
+    });
+
+    const emailTaken = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    if (usernameTaken) {
+      throw new ConflictException(`Username ${username} is already been taken`);
+    }
+
+    if (emailTaken) {
+      throw new ConflictException(`Email ${email} is already been taken`);
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = this.userRepository.create({
       username,
       email,
-      password,
+      password: hashedPassword,
     });
 
     return await this.userRepository.save(user);
@@ -41,8 +71,14 @@ export class UsersService {
       },
     });
 
-    if (user.password !== password) {
-      throw new Error('Invalid Username or password');
+    if (!user) {
+      throw new UnauthorizedException(`Username or Password is invalid`);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (isPasswordValid) {
+      throw new UnauthorizedException('Username or Password is invalid');
     }
 
     return user;
